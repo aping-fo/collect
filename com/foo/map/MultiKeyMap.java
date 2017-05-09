@@ -32,6 +32,24 @@ public class MultiKeyMap implements IterableMap,Serializable{
 	
 	/**
 	 * 取模,获得索引,如果重了，就是hash冲突了
+	 * 所以要把hash方法写好，不然容易产生冲突
+	  这个是JDK HashMap的 hash算法，其中如果是字符串，则用sun.misc带的hash
+	  没有源码，也看不到里面是怎么实现的
+	 是根据取模的来确定位置的，如果是string 的key，可能各平台的位置都不一样，这个地方要注意
+	 win 和 linux
+	 
+	  final int hash(Object k) {
+        int h = 0;
+        if (useAltHashing) {
+            if (k instanceof String) {
+                return sun.misc.Hashing.stringHash32((String) k);
+            }
+            h = hashSeed;
+        }
+        h ^= k.hashCode();
+        h ^= (h >>> 20) ^ (h >>> 12);
+        return h ^ (h >>> 7) ^ (h >>> 4);
+    }
 	 * @param hashCode
 	 * @param dataSize
 	 * @return
@@ -40,10 +58,24 @@ public class MultiKeyMap implements IterableMap,Serializable{
         return hashCode & (dataSize - 1);
     }
 	
+	/**
+	 * 在这里，大家可以理解MAP的顺序问题了
+	 * 
+	 * 这里可以看出，如果产生hash冲突，是根据equals来找值的
+	 * 
+	 * java8里hash冲突算法有所改变，在N个元素以内是采用链表结构，如果冲突元素超过N，则改用红黑树，来提高检索效率
+	 * 
+	 * 另外，注意hash扩容cpu问题
+	 * 
+	 * @param key1
+	 * @param key2
+	 * @param value
+	 * @return
+	 */
 	public Object put(Object key1, Object key2, Object value) {
         int hashCode = hash(key1, key2);
         int index = hashIndex(hashCode, data.length);
-        HashEntry entry = data[index];
+        HashEntry entry = data[index]; //取改元素
         while (entry != null) {
             if (entry.hashCode == hashCode && isEqualKey(entry, key1, key2)) {
                 Object oldValue = entry.getValue();

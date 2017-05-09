@@ -92,6 +92,26 @@ public class MultiKeyMap implements IterableMap,Serializable{
         return null;
     }
 	
+	/**
+	 * 获取值
+	 * @param key1
+	 * @param key2
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T get(Object key1, Object key2) {
+		int hashCode = hash(key1, key2);
+		int index = hashIndex(hashCode, data.length);
+		HashEntry entry = data[index]; // 取改元素
+		while (entry != null) {
+			if (entry.hashCode == hashCode && isEqualKey(entry, key1, key2)) {
+				return (T) entry.getValue();
+			}
+			entry = entry.next;
+		}
+		return null;
+	}
+	
 	private boolean isEqualKey(HashEntry entry, Object key1, Object key2) {
         MultiKey multi = (MultiKey) entry.getKey();
         return

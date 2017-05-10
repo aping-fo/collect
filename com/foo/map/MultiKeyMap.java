@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-
 import com.foo.collect.IterableMap;
 import com.foo.collect.MapIterator;
 
@@ -111,6 +110,39 @@ public class MultiKeyMap implements IterableMap,Serializable{
 		}
 		return null;
 	}
+	
+	/**
+	 * 移除元素
+	 * @param key1
+	 * @param key2
+	 * @return
+	 */
+	public Object remove(Object key1, Object key2) {
+        int hashCode = hash(key1, key2);
+        int index = hashIndex(hashCode, data.length);
+        HashEntry entry = data[index];
+        HashEntry previous = null;
+        while (entry != null) {
+            if (entry.hashCode == hashCode && isEqualKey(entry, key1, key2)) {
+                Object oldValue = entry.getValue();
+                
+                modCount ++;
+                if (previous == null) { //链表中的第一个元素,取下一个
+                    data[index] = entry.next;
+                } else {//链表中的第N个元素
+                    previous.next = entry.next;
+                }
+                //释放内存
+                entry.next = null;
+                entry.key = null;
+                entry.value = null;
+                return oldValue;
+            }
+            previous = entry;
+            entry = entry.next;
+        }
+        return null;
+    }
 	
 	private boolean isEqualKey(HashEntry entry, Object key1, Object key2) {
         MultiKey multi = (MultiKey) entry.getKey();

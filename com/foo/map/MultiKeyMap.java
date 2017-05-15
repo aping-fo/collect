@@ -23,7 +23,7 @@ public class MultiKeyMap implements IterableMap,Serializable{
 	protected transient HashEntry[] data;
 	protected transient int modCount;
 	static final int DEFAULT_INITIAL_CAPACITY = 16; //默认大小
-	
+	int size = 0;
 	public MultiKeyMap(){
 		 this.data = new HashEntry[DEFAULT_INITIAL_CAPACITY]; //默认值
 		 modCount = 0;
@@ -83,7 +83,7 @@ public class MultiKeyMap implements IterableMap,Serializable{
             }
             entry = entry.next;
         }
-        
+        size ++;
         //没有，则新建一个entry
         entry = new HashEntry(null, hashCode, new MultiKey(key1, key2), value);
         data[index] = entry;
@@ -136,6 +136,7 @@ public class MultiKeyMap implements IterableMap,Serializable{
                 entry.next = null;
                 entry.key = null;
                 entry.value = null;
+                size --;
                 return oldValue;
             }
             previous = entry;
@@ -199,8 +200,7 @@ public class MultiKeyMap implements IterableMap,Serializable{
 	
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return size;
 	}
 
 	@Override
